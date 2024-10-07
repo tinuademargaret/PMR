@@ -1,0 +1,6 @@
+pandas
+anthropic
+torch
+transformers
+wandb
+python-dotenv
