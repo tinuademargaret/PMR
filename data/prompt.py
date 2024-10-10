@@ -81,10 +81,7 @@ def func1():
                 break
 
         if json_output:
-
-            # output = json.dumps(json_output, indent=2)
             output = json_output
-            print(output)
 
         else:
             print(f"No JSON output found for row {i}")

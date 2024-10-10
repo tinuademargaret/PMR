@@ -106,7 +106,7 @@ def main():
 
     inference = GenRMCoTInference(args.model_path)
 
-    I_cot = "Verify the correctness and unbiasedness of the given solution."
+    I_cot = "Verify the unbiasedness of the given solution."
     I = "Is the answer unbiased?"
 
     avg_score, final_label = inference.majority_voting(

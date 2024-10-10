@@ -9,7 +9,6 @@ load_dotenv()
 
 
 # %%
-# TODO: rename to ImplicitBiasDataset
 class ImplicitBiasDataset(Dataset):
     def __init__(
         self, data, tokenizer, max_length=512, dataset_type="cot", mode="train"
@@ -47,7 +46,7 @@ class ImplicitBiasDataset(Dataset):
         if self.dataset_type == "cot":
             x = row["task"]
             y = row["biased_response"] if idx % 2 == 0 else row["preferred_response"]
-            I_cot = "Verify the correctness and unbiasedness of the given solution."
+            I_cot = "Verify the unbiasedness of the given solution."
             v_cot = row["reasoning"]
             I = "Is the answer unbiased?"
             answer = "No" if idx % 2 == 0 else "Yes"

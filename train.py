@@ -36,6 +36,9 @@ device = torch.device(
 
 HUGGING_FACE_TOKEN = os.getenv("HUGGING_FACE_TOKEN")
 
+TRAIN_DATA_PATH = ""
+VALIDATION_DATA_PATH = ""
+
 
 # %%
 @dataclass
@@ -64,9 +67,28 @@ class GenRMCoTTrainer:
         self.tokenizer = AutoTokenizer.from_pretrained(
             config.model_name, use_auth_token=HUGGING_FACE_TOKEN
         )
-        self.cot_dataloader, self.correct_dataloader = get_dataloader(
-            "./data/D_cot.csv", self.tokenizer, config.batch_size
+
+        wandb.init(project="GenRM-CoT", config=config)
+
+        # Initialize tokenizer
+        tokenizer = AutoTokenizer.from_pretrained(config.model_name)
+
+        # Get datasets
+        cot_train_dataset, correct_train_dataset = prepare_train_datasets(
+            TRAIN_DATA_PATH, tokenizer
         )
+
+        validation_dataset = prepare_test_datasets(VALIDATION_DATA_PATH, tokenizer)
+
+        # Get dataloaders
+        self.cot_dataloader = get_dataloader(cot_train_dataset, config.batch_size)
+        self.correct_dataloader = get_dataloader(
+            correct_train_dataset, config.batch_size
+        )
+        self.validation_dataloader = get_dataloader(
+            validation_dataset, config.batch_size
+        )
+
         self.lambda_param = config.lambda_param
         self.learning_rate = config.learning_rate
         self.num_epochs = config.num_epochs
@@ -172,45 +194,12 @@ class GenRMCoTTrainer:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train GenRM-CoT model")
-    parser.add_argument(
-        "--model_name",
-        type=str,
-        default="meta-llama/Llama-2-7b-chat-hf",
-        help="Pre-trained model name",
-    )
-    parser.add_argument(
-        "--lambda_param",
-        type=float,
-        default=1.0,
-        help="Lambda parameter for loss balancing",
-    )
-    parser.add_argument(
-        "--learning_rate", type=float, default=5e-5, help="Learning rate"
-    )
-    parser.add_argument(
-        "--num_epochs", type=int, default=10, help="Number of training epochs"
-    )
-    parser.add_argument("--batch_size", type=int, default=32, help="Batch size")
-    args = parser.parse_args()
-
     # Initialize wandb
-    wandb.init(project="GenRM-CoT", config=args)
-
-    # Initialize tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
-
-    # Get dataloaders
-    cot_dataloader = get_dataloader("./data/D_cot.csv", tokenizer, args.batch_size)
-    correct_dataloader = get_dataloader(
-        "./data/D_correct.csv", tokenizer, args.batch_size
-    )
 
     # Initialize and train the model
-    trainer = GenRMCoTTrainer(
-        args.model_name, args.lambda_param, args.learning_rate, args.num_epochs
-    )
-    trainer.train(cot_dataloader, correct_dataloader)
+    trainer = GenRMCoTTrainer(GenRMCoTTrainerConfig)
+
+    trainer.train()
 
     wandb.finish()
 
