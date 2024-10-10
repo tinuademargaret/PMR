@@ -2,9 +2,14 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import argparse
 
+device = torch.device(
+    "mps"
+    if torch.backends.mps.is_available()
+    else "cuda" if torch.cuda.is_available() else "cpu"
+)
 
 class GenRMCoTInference:
-    def __init__(self, model_path, device=None):
+    def __init__(self, model, tokenizer):
         """
         Initialize the GenRM-CoT inference class.
 
@@ -12,11 +17,8 @@ class GenRMCoTInference:
             model_path (str): Path to the trained model.
             device (str): Device to run the model on ('cuda' or 'cpu').
         """
-        self.device = (
-            device if device else ("cuda" if torch.cuda.is_available() else "cpu")
-        )
-        self.model = AutoModelForCausalLM.from_pretrained(model_path).to(self.device)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+        self.model = model
+        self.tokenizer = tokenizer
 
     def generate_cot(self, x, y, I_cot):
         """
@@ -32,7 +34,7 @@ class GenRMCoTInference:
         """
         input_text = f"{x}\n{y}\n{I_cot}"
         input_ids = self.tokenizer.encode(input_text, return_tensors="pt").to(
-            self.device
+            device
         )
 
         output = self.model.generate(input_ids, max_length=200, num_return_sequences=1)
@@ -54,7 +56,7 @@ class GenRMCoTInference:
         """
         input_text = f"{x}\n{y}\n{I_cot}\n{v_cot}\n{I}"
         input_ids = self.tokenizer.encode(input_text, return_tensors="pt").to(
-            self.device
+            device
         )
 
         with torch.no_grad():

@@ -21,7 +21,7 @@ from data.preprocess import (
     prepare_train_datasets,
 )
 
-from inference import GenRMCoTInferencer
+from inference import GenRMCoTInference
 
 from dotenv import load_dotenv
 
@@ -47,7 +47,7 @@ class GenRMCoTTrainerConfig:
     lambda_param: float = 1.0
     learning_rate: float = 5e-5
     num_epochs: int = 10
-    batch_size: int = 2
+    batch_size: int = 1
 
 
 class GenRMCoTTrainer:
@@ -67,18 +67,19 @@ class GenRMCoTTrainer:
         self.tokenizer = AutoTokenizer.from_pretrained(
             config.model_name, use_auth_token=HUGGING_FACE_TOKEN
         )
+        self.tokenizer.pad_token = self.tokenizer.eos_token
 
-        wandb.init(project="GenRM-CoT", config=config)
-
-        # Initialize tokenizer
-        tokenizer = AutoTokenizer.from_pretrained(config.model_name)
+        wandb.init(project="GenRM-CoT", config={
+            "learning_rate": config.learning_rate,
+            "epochs": config.num_epochs,
+        })
 
         # Get datasets
         cot_train_dataset, correct_train_dataset = prepare_train_datasets(
-            TRAIN_DATA_PATH, tokenizer
+            TRAIN_DATA_PATH, self.tokenizer
         )
 
-        validation_dataset = prepare_test_datasets(VALIDATION_DATA_PATH, tokenizer)
+        validation_dataset = prepare_test_datasets(VALIDATION_DATA_PATH, self.tokenizer)
 
         # Get dataloaders
         self.cot_dataloader = get_dataloader(cot_train_dataset, config.batch_size)
@@ -97,7 +98,7 @@ class GenRMCoTTrainer:
         self.scheduler = get_linear_schedule_with_warmup(
             self.optimizer, num_warmup_steps=0, num_training_steps=self.total_steps
         )
-        self.validation_inference = GenRMCoTInferencer(self.model, self.tokenizer)
+        self.validation_inference = GenRMCoTInference(config.model_name, self.tokenizer)
 
     def validation_step(self, batch):
         """
