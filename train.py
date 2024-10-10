@@ -36,8 +36,8 @@ device = torch.device(
 
 HUGGING_FACE_TOKEN = os.getenv("HUGGING_FACE_TOKEN")
 
-TRAIN_DATA_PATH = ""
-VALIDATION_DATA_PATH = ""
+TRAIN_DATA_PATH = "./data/decision_data.csv"
+VALIDATION_DATA_PATH = "./data/decision_data.csv"
 
 
 # %%
@@ -47,7 +47,7 @@ class GenRMCoTTrainerConfig:
     lambda_param: float = 1.0
     learning_rate: float = 5e-5
     num_epochs: int = 10
-    batch_size: int = 32
+    batch_size: int = 2
 
 
 class GenRMCoTTrainer:
@@ -194,7 +194,6 @@ class GenRMCoTTrainer:
 
 
 def main():
-    # Initialize wandb
 
     # Initialize and train the model
     trainer = GenRMCoTTrainer(GenRMCoTTrainerConfig)
