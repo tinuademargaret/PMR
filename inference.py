@@ -8,6 +8,7 @@ device = torch.device(
     else "cuda" if torch.cuda.is_available() else "cpu"
 )
 
+
 class GenRMCoTInference:
     def __init__(self, model, tokenizer):
         """
@@ -33,9 +34,7 @@ class GenRMCoTInference:
             str: Generated CoT rationale.
         """
         input_text = f"{x}\n{y}\n{I_cot}"
-        input_ids = self.tokenizer.encode(input_text, return_tensors="pt").to(
-            device
-        )
+        input_ids = self.tokenizer.encode(input_text, return_tensors="pt").to(device)
 
         output = self.model.generate(input_ids, max_length=200, num_return_sequences=1)
         return self.tokenizer.decode(output[0], skip_special_tokens=True)
@@ -55,9 +54,7 @@ class GenRMCoTInference:
             float: Probability of the answer being unbiased.
         """
         input_text = f"{x}\n{y}\n{I_cot}\n{v_cot}\n{I}"
-        input_ids = self.tokenizer.encode(input_text, return_tensors="pt").to(
-            device
-        )
+        input_ids = self.tokenizer.encode(input_text, return_tensors="pt").to(device)
 
         with torch.no_grad():
             outputs = self.model(input_ids)
@@ -88,7 +85,7 @@ class GenRMCoTInference:
             scores.append(score)
 
         avg_score = sum(scores) / K
-        final_label = "Yes" if avg_score > 0.5 else "No"
+        final_label = ["Yes"] if avg_score > 0.5 else ["No"]
         return avg_score, final_label
 
 
