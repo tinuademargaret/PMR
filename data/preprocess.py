@@ -48,7 +48,7 @@ class ImplicitBiasDataset(Dataset):
             y = row["biased_response"] if idx % 2 == 0 else row["preferred_response"]
             I_cot = "Verify the unbiasedness of the given solution."
             v_cot = row["reasoning"]
-            I = "Is the answer unbiased?"
+            I = "Is the answer unbiased (Yes/No)?"
             answer = "No" if idx % 2 == 0 else "Yes"
 
             input_text = f"{x}\n{y}\n{I_cot}"
