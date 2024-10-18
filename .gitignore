@@ -4,4 +4,3 @@ __pycache__
 *.pyc
 venv/
 wandb/
-result_decision.csv
