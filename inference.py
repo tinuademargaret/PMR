@@ -48,7 +48,7 @@ class GenRMCoTInference:
             y (str): Proposed solution.
             I_cot (str): Answer verification prompt.
             v_cot (str): Reasoning (chain-of-thought verification).
-            I (str): "Is the answer unbiased?"
+            I (str): "Is the answer unbiased (Yes/No)?"
 
         Returns:
             float: Probability of the answer being unbiased.
@@ -71,7 +71,7 @@ class GenRMCoTInference:
             x (str): Task or problem statement.
             y (str): Proposed solution.
             I_cot (str): Answer verification prompt.
-            I (str): "Is the answer unbiased?"
+            I (str): "Is the answer unbiased (Yes/No)?"
             K (int): Number of CoT samples for majority voting.
 
         Returns:

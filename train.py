@@ -69,10 +69,13 @@ class GenRMCoTTrainer:
         )
         self.tokenizer.pad_token = self.tokenizer.eos_token
 
-        wandb.init(project="GenRM-CoT", config={
-            "learning_rate": config.learning_rate,
-            "epochs": config.num_epochs,
-        })
+        wandb.init(
+            project="GenRM-CoT",
+            config={
+                "learning_rate": config.learning_rate,
+                "epochs": config.num_epochs,
+            },
+        )
 
         # Get datasets
         cot_train_dataset, correct_train_dataset = prepare_train_datasets(
@@ -145,12 +148,12 @@ class GenRMCoTTrainer:
         self.patience = 5
 
         for epoch in range(self.num_epochs):
-            # Training on CoT dataset
+            # Training on cot dataset
             for batch in self.cot_dataloader:
 
                 self.optimizer.zero_grad()
                 loss = self.train_step(batch)
-
+                # Training on correct dataset
                 if torch.rand(1).item() < self.lambda_param:
                     correct_batch = next(iter(self.correct_dataloader))
                     loss += self.train_step(correct_batch)
